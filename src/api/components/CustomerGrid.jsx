@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
+import ErrorAlert from "./AlertComponent/ErrorAlert";
 
 const CustomerGrid = () => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const[q,setQ] = useState("")
-  const[city,setCity] = useState("")
+  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
 
   useEffect(() => {
     const fetchComments = async () => {
+      setLoading(true);
       try {
-        const res = await fetch("https://jsonplaceholder.typicode.com/users");
+        const { key, direction } = sortConfig;
+        const res = await fetch(
+          `https://jsonplaceholder.typicode.com/users?_sort=${key}&_order=${direction}`
+        );
         if (!res.ok) {
           throw new Error("Failed to fetch data");
         }
@@ -24,7 +28,7 @@ const CustomerGrid = () => {
     };
 
     fetchComments();
-  }, []);
+  }, [sortConfig]); // Run the effect when sortConfig changes
 
   if (loading) {
     return <p className="text-center text-blue-500">Loading comments...</p>;
@@ -34,19 +38,62 @@ const CustomerGrid = () => {
     return <p className="text-center text-red-500">Error: {error}</p>;
   }
 
+  // Sorting function
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Helper function to display sort direction arrow
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return null;
+    return sortConfig.direction === "asc" ? "↑" : "↓";
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4 text-center">Customer Comments</h1>
+      {error && <ErrorAlert
+      message={error}
+      onClose={()=>setError("")}
+      />}
       <div className="overflow-x-auto">
         <table className="table-auto w-full border-collapse border border-gray-300">
           <thead className="bg-gray-200">
             <tr>
-              <th className="border border-gray-300 px-4 py-2">ID</th>
-              <th className="border border-gray-300 px-4 py-2">Name</th>
-              <th className="border border-gray-300 px-4 py-2">Email</th>
-              <th className="border border-gray-300 px-4 py-2">City</th>
-             <th className="border border-gray-300 px-4 py-2">Contact</th>
-
+              <th
+                className="border border-gray-300 px-4 py-2 cursor-pointer"
+                onClick={() => handleSort("id")}
+              >
+                ID {getSortIcon("id")}
+              </th>
+              <th
+                className="border border-gray-300 px-4 py-2 cursor-pointer"
+                onClick={() => handleSort("username")}
+              >
+                Name {getSortIcon("username")}
+              </th>
+              <th
+                className="border border-gray-300 px-4 py-2 cursor-pointer"
+                onClick={() => handleSort("email")}
+              >
+                Email {getSortIcon("email")}
+              </th>
+              <th
+                className="border border-gray-300 px-4 py-2 cursor-pointer"
+                onClick={() => handleSort("address.city")}
+              >
+                City {getSortIcon("address.city")}
+              </th>
+              <th
+                className="border border-gray-300 px-4 py-2 cursor-pointer"
+                onClick={() => handleSort("phone")}
+              >
+                Contact {getSortIcon("phone")}
+              </th>
             </tr>
           </thead>
           <tbody>
