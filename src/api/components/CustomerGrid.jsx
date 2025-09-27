@@ -1,21 +1,28 @@
 import React, { useState, useEffect } from "react";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 
 const CustomerGrid = () => {
-  const [comments, setComments] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const[q,setQ] = useState("")
-  const[city,setCity] = useState("")
 
   useEffect(() => {
-    const fetchComments = async () => {
+    const fetchCustomers = async () => {
       try {
         const res = await fetch("https://jsonplaceholder.typicode.com/users");
         if (!res.ok) {
           throw new Error("Failed to fetch data");
         }
         const data = await res.json();
-        setComments(data.slice(0, 20)); // limit to 20 rows for demo
+        setCustomers(data.slice(0, 20)); // limit to 20 rows for demo
       } catch (err) {
         setError(err.message);
       } finally {
@@ -23,47 +30,68 @@ const CustomerGrid = () => {
       }
     };
 
-    fetchComments();
+    fetchCustomers();
   }, []);
 
   if (loading) {
-    return <p className="text-center text-blue-500">Loading comments...</p>;
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "150px" }}>
+        <CircularProgress />
+        <Typography variant="body1" style={{ marginLeft: "8px" }}>
+          Loading customers...
+        </Typography>
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-center text-red-500">Error: {error}</p>;
+    return (
+      <Typography variant="body1" color="error" align="center">
+        Error: {error}
+      </Typography>
+    );
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4 text-center">Customer Comments</h1>
-      <div className="overflow-x-auto">
-        <table className="table-auto w-full border-collapse border border-gray-300">
-          <thead className="bg-gray-200">
-            <tr>
-              <th className="border border-gray-300 px-4 py-2">ID</th>
-              <th className="border border-gray-300 px-4 py-2">Name</th>
-              <th className="border border-gray-300 px-4 py-2">Email</th>
-              <th className="border border-gray-300 px-4 py-2">City</th>
-             <th className="border border-gray-300 px-4 py-2">Contact</th>
-
-            </tr>
-          </thead>
-          <tbody>
-            {comments.map((c) => (
-              <tr key={c.id} className="hover:bg-gray-100">
-                <td className="border border-gray-300 px-4 py-2">{c.id}</td>
-                <td className="border border-gray-300 px-4 py-2">{c.username}</td>
-                <td className="border border-gray-300 px-4 py-2">{c.email}</td>
-                <td className="border border-gray-300 px-4 py-2">{c.address.city}</td>
-                <td className="border border-gray-300 px-4 py-2">{c.phone}</td>
-              </tr>
+    <div style={{ marginTop: "16px" }}>
+      <Typography variant="h6" gutterBottom align="center">
+        Customer Details
+      </Typography>
+      {!customers.length ? "No Records Found" : 
+        <TableContainer component={Paper} style={{ maxHeight: 400 }}>
+        <Table stickyHeader aria-label="customer table">
+          <TableHead>
+            <TableRow>
+              <TableCell style={{ backgroundColor: "#fff", fontWeight: "bold" }}>ID</TableCell>
+              <TableCell style={{ backgroundColor: "#fff", fontWeight: "bold" }}>Name</TableCell>
+              <TableCell style={{ backgroundColor: "#fff", fontWeight: "bold" }}>Email</TableCell>
+              <TableCell style={{ backgroundColor: "#fff", fontWeight: "bold" }}>City</TableCell>
+              <TableCell style={{ backgroundColor: "#fff", fontWeight: "bold" }}>Contact</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {customers.map((c) => (
+              <TableRow
+                key={c.id}
+                style={{ cursor: "pointer", transition: "0.2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+              >
+                <TableCell>{c.id}</TableCell>
+                <TableCell>{c.username}</TableCell>
+                <TableCell>{c.email}</TableCell>
+                <TableCell>{c.address.city}</TableCell>
+                <TableCell>{c.phone}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
+      }
     </div>
   );
 };
 
 export default CustomerGrid;
+
+
