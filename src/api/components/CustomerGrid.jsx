@@ -4,6 +4,8 @@ const CustomerGrid = () => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const[q,setQ] = useState("")
+  const[city,setCity] = useState("")
 
   useEffect(() => {
     const fetchComments = async () => {
